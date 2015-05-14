@@ -32,7 +32,7 @@ public class CreateQualificationsTable implements Migration {
             table.integer("group_id");
             table.integer("student_id");
             table.integer("practice_number");
-            table.decimal("qualification", 3, 2);
+            table.decimal("qualification", 4, 2);
 
             table.primary("qualification_id");
             table.unique("group_id, student_id, practice_number");

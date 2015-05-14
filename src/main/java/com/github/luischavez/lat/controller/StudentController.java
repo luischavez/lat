@@ -72,6 +72,7 @@ public class StudentController extends Controller {
             return this.database
                     .table(Constants.STUDENTS_TABLE)
                     .where("student_id", "IN", studentIds.toArray())
+                    .order("last_name", true)
                     .get();
         }
         return null;
