@@ -133,6 +133,7 @@ public class Window extends JFrame {
             }
         });
         this.addStudentButton.addActionListener(this::onStudentSubmit);
+        this.deleteStudentButton.addActionListener(this::onStudentDelete);
         this.addGroupButton.addActionListener(this::onGroupSubmit);
         this.deleteGroupButton.addActionListener(this::onGroupDelete);
         this.qualificationButton.addActionListener(this::onQualification);
@@ -141,7 +142,7 @@ public class Window extends JFrame {
         this.searchButton.addActionListener(this::onSearch);
         this.groupComboBox.addActionListener(this::onGroupSelected);
         this.studentsTable.getSelectionModel().addListSelectionListener(this::onStudentSelected);
-        this.deleteStudentMenuItem.addActionListener(this::onStudentDelete);
+        this.removeStudentMenuItem.addActionListener(this::onStudentRemove);
         this.credentialField.addKeyListener(new KeyAdapter() {
 
             @Override
@@ -248,7 +249,7 @@ public class Window extends JFrame {
         }
     }
 
-    private void onStudentDelete(ActionEvent event) {
+    private void onStudentRemove(ActionEvent event) {
         ListSelectionModel selectionModel = this.studentsTable.getSelectionModel();
         if (!selectionModel.isSelectionEmpty()) {
             int selectedIndex = selectionModel.getMinSelectionIndex();
@@ -258,18 +259,48 @@ public class Window extends JFrame {
             String firstName = student.value("first_name", String.class);
             String lastName = student.value("last_name", String.class);
 
-            boolean confirm = this.confirm("¿Desea continuar?", String.format("Desea eliminar al estudiante: [%s] %s %s",
+            boolean confirm = this.confirm("¿Desea continuar?", String.format("Desea remover al estudiante: [%s] %s %s",
                     credential, firstName, lastName));
             if (confirm) {
                 boolean remove = this.groupController.removeStudent(this.getGroupId(), student.value("student_id", Long.class));
                 if (!remove) {
-                    this.error("No se pudo eliminar al estudiante",
-                            String.format("Desea eliminar al estudiante: [%s] %s %s"));
+                    this.error("No se pudo remover al estudiante",
+                            String.format("[%s] %s %s", credential, firstName, lastName));
                     return;
                 }
                 String groupName = this.groupComboBox.getSelectedItem().toString();
                 this.groupComboBox.setSelectedItem(groupName);
             }
+        }
+    }
+
+    private void onStudentDelete(ActionEvent event) {
+        String credential = this.credentialField.getText().toLowerCase();
+
+        if (credential.isEmpty()) {
+            this.error("No se pudo eliminar el estudiante", "La matricula no es valida");
+            return;
+        }
+
+        Row student = this.studentController.getByCredential(credential);
+        if (null == student) {
+            this.error("No se pudo eliminar el estudiante", String.format("La matricula %s no esta registrada", credential));
+            return;
+        }
+        long studentId = student.value("student_id", Long.class);
+        String firstName = student.value("first_name", String.class);
+        String lastName = student.value("last_name", String.class);
+        if (!this.confirm("¿Desea continuar?", String.format("Desea eliminar al estudiante: [%s] %s %s",
+                credential, firstName, lastName))) {
+            return;
+        }
+        if (this.studentController.delete(studentId)) {
+            this.message("Se elimino al estudiante correctamente",
+                    String.format("[%s] %s %s", credential, firstName, lastName));
+            String groupName = this.groupComboBox.getSelectedItem().toString();
+            this.groupComboBox.setSelectedItem(groupName);
+        } else {
+            this.error("No se pudo eliminar el estudiante", "Ocurrio un error al eliminar el estudiante");
         }
     }
 
@@ -421,7 +452,7 @@ public class Window extends JFrame {
     private void initComponents() {
 
         studentTablePopMenu = new javax.swing.JPopupMenu();
-        deleteStudentMenuItem = new javax.swing.JMenuItem();
+        removeStudentMenuItem = new javax.swing.JMenuItem();
         studentsPanel = new javax.swing.JScrollPane();
         studentsTable = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
@@ -444,9 +475,10 @@ public class Window extends JFrame {
         averageLabel = new javax.swing.JLabel();
         allExcelButton = new javax.swing.JButton();
         searchButton = new javax.swing.JButton();
+        deleteStudentButton = new javax.swing.JButton();
 
-        deleteStudentMenuItem.setText("Eliminar");
-        studentTablePopMenu.add(deleteStudentMenuItem);
+        removeStudentMenuItem.setText("Remover");
+        studentTablePopMenu.add(removeStudentMenuItem);
 
         studentsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -552,55 +584,62 @@ public class Window extends JFrame {
 
         searchButton.setText("Buscar");
 
+        deleteStudentButton.setText("Eliminar");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(studentsPanel)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(credentialField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(firstNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lastNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(40, 40, 40)
-                        .addComponent(searchButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(addStudentButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(groupComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(addGroupButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(deleteGroupButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(allExcelButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(excelButton)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(qualificationButton)
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(qualificationButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(credentialLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(studentNameLabel))
+                            .addComponent(qualificationsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 444, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(averageLabel, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(studentsPanel)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(credentialField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(firstNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lastNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(14, 14, 14)
+                                .addComponent(searchButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(deleteStudentButton))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(groupComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(addGroupButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(deleteGroupButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(allExcelButton)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(credentialLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(studentNameLabel))
-                    .addComponent(qualificationsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 444, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(averageLabel, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(excelButton, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(addStudentButton, javax.swing.GroupLayout.Alignment.TRAILING))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -621,8 +660,9 @@ public class Window extends JFrame {
                     .addComponent(firstNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3)
                     .addComponent(lastNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(addStudentButton)
-                    .addComponent(searchButton))
+                    .addComponent(searchButton)
+                    .addComponent(deleteStudentButton)
+                    .addComponent(addStudentButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(studentsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 382, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -647,7 +687,7 @@ public class Window extends JFrame {
     private javax.swing.JTextField credentialField;
     private javax.swing.JLabel credentialLabel;
     private javax.swing.JButton deleteGroupButton;
-    private javax.swing.JMenuItem deleteStudentMenuItem;
+    private javax.swing.JButton deleteStudentButton;
     private javax.swing.JButton excelButton;
     private javax.swing.JTextField firstNameField;
     private javax.swing.JComboBox groupComboBox;
@@ -659,6 +699,7 @@ public class Window extends JFrame {
     private javax.swing.JButton qualificationButton;
     private javax.swing.JScrollPane qualificationsPanel;
     private javax.swing.JTable qualificationsTable;
+    private javax.swing.JMenuItem removeStudentMenuItem;
     private javax.swing.JButton searchButton;
     private javax.swing.JLabel studentNameLabel;
     private javax.swing.JPopupMenu studentTablePopMenu;
