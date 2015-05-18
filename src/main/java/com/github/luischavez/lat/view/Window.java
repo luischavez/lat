@@ -417,12 +417,15 @@ public class Window extends JFrame {
             this.error("No se pudo eliminar el grupo", "El grupo no existe");
             return;
         }
-        if (this.groupController.delete(groupName)) {
-            this.message("Se elimino el grupo correctamente", String.format("Grupo: %s", groupName));
-            this.loadGroups();
-            this.groupComboBox.setSelectedIndex(0);
-        } else {
-            this.error("No se pudo eliminar el grupo", "Ocurrio un error al eliminar el grupo");
+        boolean confirm = this.confirm("¿Desea continuar?", String.format("Desea eliminar el grupo: %s", groupName));
+        if (confirm) {
+            if (this.groupController.delete(groupName)) {
+                this.message("Se elimino el grupo correctamente", String.format("Grupo: %s", groupName));
+                this.loadGroups();
+                this.groupComboBox.setSelectedIndex(0);
+            } else {
+                this.error("No se pudo eliminar el grupo", "Ocurrio un error al eliminar el grupo");
+            }
         }
     }
 
