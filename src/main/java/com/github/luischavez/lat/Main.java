@@ -16,10 +16,12 @@
  */
 package com.github.luischavez.lat;
 
-import com.github.luischavez.lat.view.Window;
 import com.github.luischavez.database.Database;
 import com.github.luischavez.database.configuration.ProjectSource;
 import com.github.luischavez.database.configuration.XMLBuilder;
+
+import com.github.luischavez.lat.view.Window;
+import com.github.luischavez.lat.view.Splash;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -42,7 +44,6 @@ public class Main {
                 IllegalAccessException | UnsupportedLookAndFeelException ex) {
             throw new RuntimeException(ex);
         }
-
-        Window window = new Window();
+        new Splash().show(() -> new Window());
     }
 }
