@@ -16,8 +16,12 @@
  */
 package com.github.luischavez.lat.view;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.io.IOException;
 import java.util.Timer;
@@ -35,9 +39,11 @@ import javax.swing.SwingUtilities;
  */
 public class Splash extends JFrame {
 
+    private String[] authors;
     private Image logo;
 
-    public Splash() {
+    public Splash(String[] authors) {
+        this.authors = authors;
         try {
             this.logo = ImageIO.read(this.getClass().getResource("/images/logo.png"));
         } catch (IOException ex) {
@@ -81,7 +87,17 @@ public class Splash extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            g.drawImage(Splash.this.logo, 0, 0, Splash.this);
+            Graphics2D graphics2D = (Graphics2D) g;
+            graphics2D.drawImage(Splash.this.logo, 0, 0, Splash.this);
+            graphics2D.setColor(Color.black);
+            graphics2D.setFont(new Font("Arial", Font.BOLD, 16));
+            FontMetrics font = graphics2D.getFontMetrics();
+            for (int i = 0; i < Splash.this.authors.length; i++) {
+                String author = Splash.this.authors[i];
+                int px = (int) (getWidth() / 2 - font.getStringBounds(author, graphics2D).getWidth() / 2);
+                int py = 30 + (15 * i);
+                graphics2D.drawString(author, px, py);
+            }
         }
     }
 }

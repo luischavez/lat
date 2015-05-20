@@ -32,6 +32,13 @@ import javax.swing.UnsupportedLookAndFeelException;
  */
 public class Main {
 
+    public static final String[] AUTHORS = {
+        "Luis Abdul Chávez Bustamante",
+        "Javier Maldonado Rivera",
+        "Cristian Manuel Franco Diaz",
+        "Cesar Omar Hernandez Casas"
+    };
+
     public static void main(String[] args) {
         Database.load(new XMLBuilder(), new ProjectSource("/database.xml"));
         Database database = Database.use("default");
@@ -44,6 +51,6 @@ public class Main {
                 IllegalAccessException | UnsupportedLookAndFeelException ex) {
             throw new RuntimeException(ex);
         }
-        new Splash().show(() -> new Window());
+        new Splash(AUTHORS).show(() -> new Window());
     }
 }
