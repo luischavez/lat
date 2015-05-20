@@ -78,8 +78,8 @@ public class Excel {
         Font font = workbook.createFont();
         font.setColor(HSSFColor.WHITE.index);
         style.setFont(font);
-        style.setFillBackgroundColor(IndexedColors.AQUA.getIndex());
-        style.setFillPattern(CellStyle.BIG_SPOTS);
+        style.setFillBackgroundColor(IndexedColors.GREEN.getIndex());
+        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
         Row row = sheet.createRow(0);
         this.createCell(0, row, style, "#");
@@ -99,8 +99,8 @@ public class Excel {
             String credential = student.value("credential", String.class);
             String firstName = student.value("first_name", String.class);
             String lastName = student.value("last_name", String.class);
-            row = sheet.createRow(current++);
-            this.createNumber(0, row, null, current);
+            row = sheet.createRow(current);
+            this.createNumber(0, row, null, current++);
             this.createCell(1, row, null, credential);
             this.createCell(2, row, null, firstName);
             this.createCell(3, row, null, lastName);
