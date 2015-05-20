@@ -36,7 +36,8 @@ public class Main {
         "Luis Abdul Chávez Bustamante",
         "Javier Maldonado Rivera",
         "Cristian Manuel Franco Diaz",
-        "Cesar Omar Hernandez Casas"
+        "Cesar Omar Hernandez Casas",
+        "Rubí Ozeta Zavala"
     };
 
     public static void main(String[] args) {
